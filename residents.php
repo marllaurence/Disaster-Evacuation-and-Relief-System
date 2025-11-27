@@ -68,6 +68,10 @@ $user_role = htmlspecialchars($_SESSION['role']);
                         <span class="material-symbols-outlined text-primary">groups</span>
                         <p class="text-sm font-medium">Residents</p>
                     </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="admin_requests.php">
+    <span class="material-symbols-outlined group-hover:text-red-400 transition-colors">emergency_share</span>
+    <p class="text-sm font-medium">Requests</p>
+</a>
                     <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="evacuation.php">
                         <span class="material-symbols-outlined group-hover:text-orange-400 transition-colors">warehouse</span>
                         <p class="text-sm font-medium">Evacuation</p>
@@ -75,6 +79,8 @@ $user_role = htmlspecialchars($_SESSION['role']);
                     <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="relief.php">
                         <span class="material-symbols-outlined group-hover:text-green-400 transition-colors">volunteer_activism</span>
                         <p class="text-sm font-medium">Relief</p>
+
+
                     </a>
                 </nav>
             </div>

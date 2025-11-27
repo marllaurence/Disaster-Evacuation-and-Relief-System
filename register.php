@@ -17,6 +17,9 @@ if (isset($_SESSION['user_id'])) {
     <script src="https://cdn.tailwindcss.com?plugins=container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -27,24 +30,15 @@ if (isset($_SESSION['user_id'])) {
                         "background-light": "#f5f7f8",
                         "background-dark": "#101922",
                     },
-                    fontFamily: {
-                        "display": ["Public Sans", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
+                    fontFamily: { "display": ["Public Sans", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
                 },
             },
         }
     </script>
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            font-size: 24px;
-        }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 24px; }
+        #register-map { height: 250px; width: 100%; border-radius: 0.5rem; z-index: 1; border: 1px solid #314d68; }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display">
@@ -53,9 +47,7 @@ if (isset($_SESSION['user_id'])) {
                 <div class="flex flex-col gap-10">
                     <div class="flex items-center gap-3 text-white">
                         <div class="size-6 text-primary">
-                            <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                                <path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
-                            </svg>
+                            <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path></svg>
                         </div>
                         <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Disaster Response</h2>
                     </div>
@@ -117,12 +109,54 @@ if (isset($_SESSION['user_id'])) {
                                             <p class="text-white text-base font-medium leading-normal pb-2">Last Name</p>
                                             <input id="last_name" name="last_name" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#314d68] bg-[#101a23] focus:border-primary h-14 placeholder:text-[#90adcb] p-[15px] text-base font-normal leading-normal" placeholder="Enter your last name" required />
                                         </label>
-                                        <label class="flex flex-col md:col-span-2">
-                                            <p class="text-white text-base font-medium leading-normal pb-2">Address</p>
-                                            <input id="address" name="address" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#314d68] bg-[#101a23] focus:border-primary h-14 placeholder:text-[#90adcb] p-[15px] text-base font-normal leading-normal" placeholder="Enter your full address" required />
+                                        
+                                        <label class="flex flex-col">
+                                            <p class="text-white text-base font-medium leading-normal pb-2">Birthdate</p>
+                                            <input type="date" name="birthdate" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#314d68] bg-[#101a23] focus:border-primary h-14 placeholder:text-[#90adcb] p-[15px] text-base font-normal leading-normal" required />
+                                        </label>
+                                        <label class="flex flex-col">
+                                            <p class="text-white text-base font-medium leading-normal pb-2">Gender</p>
+                                            <select name="gender" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-white focus:outline-0 focus:ring-0 border border-[#314d68] bg-[#101a23] focus:border-primary h-14 placeholder:text-[#90adcb] p-[15px] text-base font-normal leading-normal">
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="Other">Other</option>
+                                            </select>
                                         </label>
                                     </div>
                                 </div>
+
+                                <div>
+                                    <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5 mb-2">Location & Address</h2>
+                                    
+                                    <div class="flex flex-col gap-2 mb-4">
+                                        <p class="text-[#90adcb] text-sm">Pin your house on the map (Mati City)</p>
+                                        <div id="register-map"></div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                                        <label class="flex flex-col">
+                                            <p class="text-white text-base font-medium leading-normal pb-2">Latitude</p>
+                                            <input id="latitude" name="latitude" readonly class="bg-[#101a23] border border-[#314d68] text-gray-400 rounded-lg h-14 px-4 cursor-not-allowed" />
+                                        </label>
+                                        <label class="flex flex-col">
+                                            <p class="text-white text-base font-medium leading-normal pb-2">Longitude</p>
+                                            <input id="longitude" name="longitude" readonly class="bg-[#101a23] border border-[#314d68] text-gray-400 rounded-lg h-14 px-4 cursor-not-allowed" />
+                                        </label>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <label class="flex flex-col">
+                                            <p class="text-white text-base font-medium leading-normal pb-2">Zone / Purok</p>
+                                            <input name="zone_purok" class="form-input bg-[#101a23] border border-[#314d68] text-white rounded-lg h-14 px-4 focus:border-primary outline-none" placeholder="e.g. Zone 1, Purok Baybay" required />
+                                        </label>
+                                        
+                                        <label class="flex flex-col">
+                                            <p class="text-white text-base font-medium leading-normal pb-2">Complete Address / Notes</p>
+                                            <input id="address" name="address" class="form-input bg-[#101a23] border border-[#314d68] text-white rounded-lg h-14 px-4 focus:border-primary outline-none" placeholder="House No., Street Name" required />
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <h2 class="text-white text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3 pt-5 mb-2">Account Credentials</h2>
                                     <div class="grid grid-cols-1 gap-6">
@@ -161,7 +195,39 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
             </main>
-        </div> <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        </div> 
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="assets/js/register.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            const matiLat = 6.9567;
+            const matiLng = 126.2174;
+
+            var map = L.map('register-map', {
+                center: [matiLat, matiLng],
+                zoom: 13,
+                minZoom: 11,
+                maxBounds: [[6.80, 126.00], [7.15, 126.50]],
+                maxBoundsViscosity: 1.0
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19, attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            var marker;
+
+            map.on('click', function(e) {
+                if (marker) marker.setLatLng(e.latlng);
+                else marker = L.marker(e.latlng).addTo(map);
+                
+                $('#latitude').val(e.latlng.lat.toFixed(8));
+                $('#longitude').val(e.latlng.lng.toFixed(8));
+            });
+        });
+    </script>
 </body>
 </html>

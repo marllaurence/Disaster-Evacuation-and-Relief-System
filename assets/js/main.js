@@ -1,5 +1,5 @@
 // ==========================================
-// 1. GLOBAL SETUP (Must be at top)
+// 1. GLOBAL SETUP
 // ==========================================
 window.allHouseholdsData = []; // Global Data Storage
 var editMap, editMarker; // Edit Map Variables
@@ -17,7 +17,7 @@ window.editHousehold = function(id) {
         $('#edit_zone').val(household.zone_purok);
         $('#edit_address').val(household.address_notes);
         
-        // Fill Coordinates (Hidden or Readonly inputs)
+        // Fill Coordinates
         $('#edit_latitude').val(household.latitude);
         $('#edit_longitude').val(household.longitude);
 
@@ -71,7 +71,6 @@ function setEditMarker(location) {
     if (editMarker) editMarker.setLatLng(location);
     else editMarker = L.marker(location).addTo(editMap);
     
-    // Handle both Leaflet object and Array formats
     var lat = location.lat || location[0];
     var lng = location.lng || location[1];
     
@@ -94,7 +93,7 @@ window.deleteHousehold = function(id, encodedName) {
 // 2. DOCUMENT READY
 // ==========================================
 $(document).ready(function() {
-    console.log("Main.js Loaded - V106");
+    console.log("Main.js Loaded - V107 (Clickable Maps)");
 
     var map; // Add Map
     var marker; // Add Marker
@@ -136,31 +135,39 @@ $(document).ready(function() {
                 if (data.length === 0) { tableBody.html('<tr><td colspan="6" class="text-center py-8 text-slate-500">No data.</td></tr>'); return; }
 
                 data.forEach(function(h) {
-                    var loc = (h.latitude && h.longitude) ? 
-                        `<div class="flex items-center gap-2 text-xs text-slate-400 font-mono"><span class="material-symbols-outlined text-red-500 text-[16px]">location_on</span> ${parseFloat(h.latitude).toFixed(4)}, ${parseFloat(h.longitude).toFixed(4)}</div>` : 
-                        '<span class="text-slate-600 text-xs italic">No Pin</span>';
+                    var loc = '<span class="text-slate-600 text-xs italic">No Pin</span>';
+                    
+                    // --- UPDATED MAP LINK LOGIC ---
+                    if (h.latitude && h.longitude) {
+                        loc = `
+                            <a href="https://www.google.com/maps?q=${h.latitude},${h.longitude}" target="_blank" class="flex items-center gap-2 group hover:bg-white/5 p-1.5 rounded-lg transition-colors" title="View on Google Maps">
+                                <div class="p-1 rounded bg-red-500/10 border border-red-500/20 group-hover:bg-red-500/20 transition-colors">
+                                    <span class="material-symbols-outlined text-red-500 !text-[18px] group-hover:scale-110 transition-transform">location_on</span>
+                                </div>
+                                <div class="flex flex-col text-[10px] font-mono text-slate-300 leading-tight group-hover:text-white">
+                                    <span>${parseFloat(h.latitude).toFixed(5)}</span>
+                                    <span>${parseFloat(h.longitude).toFixed(5)}</span>
+                                </div>
+                            </a>`;
+                    }
+
                     var safeName = encodeURIComponent(h.household_head_name);
 
-                    // --- ALIGNMENT FIX HERE ---
-                    // 1. whitespace-nowrap: prevents buttons from wrapping to next line
-                    // 2. text-right: forces content to the right
-                    // 3. justify-end: ensures flex items stick to the right side
                     var row = `
                         <tr class="border-b border-[#283039] hover:bg-[#222831] transition-colors">
                             <td class="px-6 py-4 text-[#9dabb9] text-sm">${h.id}</td>
                             <td class="px-6 py-4 text-white font-medium text-sm">${h.household_head_name}</td>
                             <td class="px-6 py-4 text-[#9dabb9] text-sm">${h.zone_purok || '-'}</td>
                             <td class="px-6 py-4 text-center"><span class="bg-[#283039] text-white text-xs px-2 py-1 rounded border border-slate-600 font-bold">${h.member_count}</span></td>
+                            
                             <td class="px-6 py-4">${loc}</td>
                             
                             <td class="px-6 py-4 text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-2">
                                     <a href="household_details.php?id=${h.id}" class="text-primary text-xs font-bold uppercase hover:text-blue-400 mr-2">Manage</a>
-                                    
                                     <button onclick="window.editHousehold(${h.id})" class="text-slate-400 hover:text-yellow-400 transition-colors p-1">
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
                                     </button>
-
                                     <button onclick="window.deleteHousehold(${h.id}, '${safeName}')" class="text-slate-400 hover:text-red-400 transition-colors p-1">
                                         <span class="material-symbols-outlined text-[20px]">delete</span>
                                     </button>

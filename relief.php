@@ -76,6 +76,10 @@ $user_role = htmlspecialchars($_SESSION['role']);
                         <span class="material-symbols-outlined text-white">groups</span>
                         <p class="text-white text-sm font-medium leading-normal">Residents</p>
                     </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="admin_requests.php">
+    <span class="material-symbols-outlined group-hover:text-red-400 transition-colors">emergency_share</span>
+    <p class="text-sm font-medium">Requests</p>
+</a>
                     <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="evacuation.php">
                         <span class="material-symbols-outlined text-white">warehouse</span>
                         <p class="text-white text-sm font-medium leading-normal">Evacuation</p>
