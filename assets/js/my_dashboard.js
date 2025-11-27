@@ -7,6 +7,72 @@ $(document).ready(function() {
     var userMap;
     var userLocationMarker;
 
+
+    // ==========================================
+    // 3. EVACUATION HISTORY LOGIC (Add this if missing)
+    // ==========================================
+    
+    // OPEN MODAL
+    $(document).on('click', '#view-evac-history-btn', function(e) {
+        e.preventDefault();
+        console.log("Evacuation History Clicked"); // Debug check
+
+        // Show Modal
+        $('#evacuation-history-modal').removeClass('hidden');
+        $('body').addClass('overflow-hidden'); // Prevent background scrolling
+        
+        // Set loading state
+        var tbody = $('#evacuation-history-table');
+        tbody.html('<tr><td colspan="4" class="text-center py-4 text-slate-400">Loading records...</td></tr>');
+        
+        // Fetch Data
+        $.ajax({
+            url: 'api/resident/get_evacuation_history.php',
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                tbody.empty();
+                
+                if (res.success && res.history.length > 0) {
+                    res.history.forEach(function(log) {
+                        // Format Date
+                        var checkIn = new Date(log.check_in_time).toLocaleString('en-US', {
+                            month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'
+                        });
+                        
+                        // Status Badge
+                        var statusBadge = (log.status === 'Checked Out' || log.check_out_time) 
+                            ? '<span class="px-2 py-1 rounded bg-slate-700 text-slate-300 text-xs font-bold">Checked Out</span>' 
+                            : '<span class="px-2 py-1 rounded bg-green-500/20 text-green-500 text-xs font-bold animate-pulse">Active</span>';
+
+                        var row = `
+                            <tr class="hover:bg-white/5 transition-colors border-b border-slate-700 last:border-0">
+                                <td class="px-4 py-3 text-white text-sm font-medium">${log.first_name}</td>
+                                <td class="px-4 py-3 text-slate-300 text-sm">${log.center_name}</td>
+                                <td class="px-4 py-3 text-slate-300 text-sm">${checkIn}</td>
+                                <td class="px-4 py-3">${statusBadge}</td>
+                            </tr>`;
+                        tbody.append(row);
+                    });
+                } else if (res.success && res.history.length === 0) {
+                    tbody.html('<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 italic">No evacuation records found.</td></tr>');
+                } else {
+                    tbody.html('<tr><td colspan="4" class="px-4 py-4 text-center text-red-400">Error loading data.</td></tr>');
+                }
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                tbody.html('<tr><td colspan="4" class="px-4 py-4 text-center text-red-400">System Error. Check console.</td></tr>');
+            }
+        });
+    });
+
+    // CLOSE MODAL
+    $(document).on('click', '#close-evac-modal-btn, #close-evac-btn-bottom', function(e) {
+        e.preventDefault();
+        $('#evacuation-history-modal').addClass('hidden');
+        $('body').removeClass('overflow-hidden');
+    });
     // ==========================================
     // 1. DATA LOADERS
     // ==========================================
