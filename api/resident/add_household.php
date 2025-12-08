@@ -1,88 +1,77 @@
 <?php
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// api/resident/add_household.php
+include_once '../config/session.php';
+include_once '../config/db_connect.php';
 
 header('Content-Type: application/json');
-include '../config/db_connect.php';
 
-$response = [
-    'success' => false,
-    'message' => 'An unknown error occurred.'
-];
-
-// --- 1. Get the data ---
-$household_head_name = trim($_POST['household_head_name'] ?? '');
-$zone_purok = $_POST['zone_purok'] ?? '';
-$address_notes = $_POST['address_notes'] ?? '';
-
-// --- NEW: Get Coordinates ---
-$latitude = $_POST['latitude'] ?? null;
-$longitude = $_POST['longitude'] ?? null;
-
-// Handle empty strings sent by the form (convert to NULL)
-if ($latitude === '') $latitude = null;
-if ($longitude === '') $longitude = null;
-
-// --- 2. Validation ---
-if (empty($household_head_name)) {
-    $response['message'] = 'Household Head Name is required.';
-    echo json_encode($response);
+// 1. Check Admin Access
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
     exit;
 }
 
-// --- 3. "Smart" Name Splitting ---
-$name_parts = explode(' ', $household_head_name, 2);
-$first_name = $name_parts[0];
-$last_name = $name_parts[1] ?? '(no last name)'; 
+// 2. Get Data
+$head_name = trim($_POST['household_head_name'] ?? '');
+$zone = $_POST['zone_purok'] ?? '';
+$address_notes = $_POST['address_notes'] ?? '';
 
+// Coordinates
+$latitude = $_POST['latitude'] ?? null;
+$longitude = $_POST['longitude'] ?? null;
+$birthdate = $_POST['birthdate'] ?? null;
+$gender = $_POST['gender'] ?? 'Not Specified';
 
-// --- 4. Start Transaction ---
+// Sanitize Inputs
+if ($latitude === '') $latitude = null;
+if ($longitude === '') $longitude = null;
+if (empty($birthdate)) $birthdate = null;
+
+// Validation
+if (empty($head_name)) {
+    echo json_encode(['success' => false, 'message' => 'Household Head Name is required.']);
+    exit;
+}
+
+// 3. Start Transaction
 $conn->begin_transaction();
 
 try {
-    // --- Step A: Insert into households table (UPDATED WITH LAT/LONG) ---
-    $stmt1 = $conn->prepare(
-        "INSERT INTO households (household_head_name, zone_purok, address_notes, latitude, longitude) 
-         VALUES (?, ?, ?, ?, ?)"
-    );
-    // "sssdd" = String, String, String, Double, Double
-    $stmt1->bind_param("sssdd", $household_head_name, $zone_purok, $address_notes, $latitude, $longitude);
-    $stmt1->execute();
+    // A. Create Household
+    // FIX: Removed 'member_count' from this query
+    $stmt1 = $conn->prepare("INSERT INTO households (household_head_name, zone_purok, address_notes, latitude, longitude) VALUES (?, ?, ?, ?, ?)");
+    $stmt1->bind_param("sssdd", $head_name, $zone, $address_notes, $latitude, $longitude);
     
-    // Get the ID of the new household we just created
+    if (!$stmt1->execute()) {
+        throw new Exception("Error creating household: " . $stmt1->error);
+    }
+    
     $new_household_id = $conn->insert_id;
     $stmt1->close();
 
-    if ($new_household_id == 0) {
-        throw new Exception("Failed to create new household.");
-    }
+    // B. Create Resident (Head of Family)
+    // "Smart" Name Splitting
+    $name_parts = explode(' ', $head_name, 2);
+    $first_name = $name_parts[0];
+    $last_name = $name_parts[1] ?? '(No Last Name)';
 
-    // --- Step B: Insert the head as a person into residents table ---
-    // (This logic remains exactly the same as your original)
-    $stmt2 = $conn->prepare(
-        "INSERT INTO residents (household_id, first_name, last_name) 
-         VALUES (?, ?, ?)"
-    );
-    $stmt2->bind_param("iss", $new_household_id, $first_name, $last_name);
-    $stmt2->execute();
+    // Insert into Residents table
+    $stmt2 = $conn->prepare("INSERT INTO residents (household_id, first_name, last_name, birthdate, gender) VALUES (?, ?, ?, ?, ?)");
+    $stmt2->bind_param("issss", $new_household_id, $first_name, $last_name, $birthdate, $gender);
+    
+    if (!$stmt2->execute()) {
+        throw new Exception("Error creating resident: " . $stmt2->error);
+    }
     $stmt2->close();
 
-    // --- Step C: If all good, commit changes ---
+    // C. Commit
     $conn->commit();
-    $response['success'] = true;
-    $response['message'] = 'Household created and Location pinned successfully!';
+    echo json_encode(['success' => true, 'message' => 'Household and Resident created successfully!']);
 
 } catch (Exception $e) {
-    // --- Step D: If anything failed, roll back all changes ---
     $conn->rollback();
-    $response['message'] = 'Transaction Error: ' . $e->getMessage();
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 
-// Close the database connection
 $conn->close();
-
-// Send the JSON response back
-echo json_encode($response);
 ?>

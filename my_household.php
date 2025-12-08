@@ -156,7 +156,10 @@ if (!file_exists($profile_pic)) $profile_pic = 'assets/img/default-avatar.png';
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="assets/js/my_dashboard.js"></script>
+   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script src="assets/js/my_dashboard.js?v=2"></script>
 </body>
 </html>

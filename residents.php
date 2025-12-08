@@ -37,16 +37,17 @@ $user_role = htmlspecialchars($_SESSION['role']);
     </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; font-size: 24px; }
-        #household-map { height: 250px; width: 100%; z-index: 1; border-radius: 0.5rem; }
+        #household-map, #edit-household-map { height: 250px; width: 100%; z-index: 1; border-radius: 0.5rem; }
+        #all-households-map { height: 500px; width: 100%; z-index: 1; border-radius: 0.5rem; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #1c2127; }
         ::-webkit-scrollbar-thumb { background: #314d68; border-radius: 10px; }
+        thead th { position: sticky; top: 0; z-index: 20; }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-white overflow-hidden">
-
     <div class="flex h-screen w-full">
-    
+        
         <aside class="flex w-64 flex-col bg-[#1c2127] border-r border-[#283039] shrink-0 transition-all duration-300">
             <div class="flex flex-col gap-6 p-6">
                 <div class="flex items-center gap-3">
@@ -69,9 +70,9 @@ $user_role = htmlspecialchars($_SESSION['role']);
                         <p class="text-sm font-medium">Residents</p>
                     </a>
                     <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="admin_requests.php">
-    <span class="material-symbols-outlined group-hover:text-red-400 transition-colors">emergency_share</span>
-    <p class="text-sm font-medium">Requests</p>
-</a>
+                        <span class="material-symbols-outlined group-hover:text-red-400 transition-colors">emergency_share</span>
+                        <p class="text-sm font-medium">Requests</p>
+                    </a>
                     <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="evacuation.php">
                         <span class="material-symbols-outlined group-hover:text-orange-400 transition-colors">warehouse</span>
                         <p class="text-sm font-medium">Evacuation</p>
@@ -79,17 +80,10 @@ $user_role = htmlspecialchars($_SESSION['role']);
                     <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="relief.php">
                         <span class="material-symbols-outlined group-hover:text-green-400 transition-colors">volunteer_activism</span>
                         <p class="text-sm font-medium">Relief</p>
-
-
                     </a>
                 </nav>
             </div>
-            <div class="mt-auto p-6 border-t border-[#283039] flex flex-col gap-2">
-                <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all" href="#">
-                    <span class="material-symbols-outlined">settings</span>
-                    <p class="text-sm font-medium">Settings</p>
-                </a>
-
+            <div class="mt-auto p-6 border-t border-[#283039]">
                 <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-red-500/10 text-[#9dabb9] hover:text-red-400 transition-all" href="api/auth/logout_process.php">
                     <span class="material-symbols-outlined">logout</span>
                     <p class="text-sm font-medium">Logout</p>
@@ -98,33 +92,36 @@ $user_role = htmlspecialchars($_SESSION['role']);
         </aside>
 
         <main class="flex flex-1 flex-col h-screen overflow-hidden bg-background-dark relative">
-            
             <header class="flex justify-between items-center p-6 lg:p-8 border-b border-[#283039] bg-[#1c2127]/50 backdrop-blur-sm sticky top-0 z-10">
                 <div>
                     <h1 class="text-2xl font-bold text-white tracking-tight">Resident Management</h1>
                     <p class="text-sm text-[#9dabb9]">Monitor households and population statistics.</p>
                 </div>
-                <button id="open-add-household-btn" class="bg-primary hover:bg-blue-600 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-blue-900/30 hover:scale-[1.02] active:scale-95">
-                    <span class="material-symbols-outlined">add_location_alt</span> Add Household
-                </button>
+                <div class="flex gap-3">
+                    <button id="open-all-map-btn" class="bg-[#e3a008] hover:bg-yellow-600 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:scale-[1.02] active:scale-95">
+                        <span class="material-symbols-outlined">map</span> View Map
+                    </button>
+                    <button id="open-add-household-btn" class="bg-primary hover:bg-blue-600 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-all shadow-lg shadow-blue-900/30 hover:scale-[1.02] active:scale-95">
+                        <span class="material-symbols-outlined">add_location_alt</span> Add Household
+                    </button>
+                </div>
             </header>
             
             <div class="flex-1 overflow-y-auto p-6 lg:p-8 flex flex-col gap-6">
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-primary shadow-sm">
                         <p class="text-[#9dabb9] text-xs font-bold uppercase tracking-wider">Total Households</p>
                         <p id="stats-total-households" class="text-white text-3xl font-bold">0</p>
                     </div>
-                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-green-500 shadow-sm">
                         <p class="text-[#9dabb9] text-xs font-bold uppercase tracking-wider">Total Residents</p>
                         <p id="stats-total-residents" class="text-white text-3xl font-bold">0</p>
                     </div>
-                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-orange-500 shadow-sm">
                         <p class="text-[#9dabb9] text-xs font-bold uppercase tracking-wider">Affected</p>
                         <p id="stats-affected-households" class="text-white text-3xl font-bold">0</p>
                     </div>
-                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-red-500 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col gap-1 rounded-xl bg-[#1c2127] p-5 border border-[#283039] border-l-4 border-l-red-500 shadow-sm">
                         <p class="text-[#9dabb9] text-xs font-bold uppercase tracking-wider">Evacuated</p>
                         <p id="stats-residents-evacuated" class="text-white text-3xl font-bold">0</p>
                     </div>
@@ -133,16 +130,15 @@ $user_role = htmlspecialchars($_SESSION['role']);
                 <div class="bg-[#1c2127] rounded-xl border border-[#283039] overflow-hidden flex flex-col shadow-xl flex-1 min-h-0">
                     <div class="overflow-auto flex-1">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-[#283039] text-white sticky top-0 z-10">
-                            <tr>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-[#9dabb9] uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-[#9dabb9] uppercase tracking-wider">Household Head</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-[#9dabb9] uppercase tracking-wider">Zone/Purok</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-[#9dabb9] uppercase tracking-wider">Members</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-[#9dabb9] uppercase tracking-wider">Location</th>
-                                <th class="px-6 py-4 text-right text-xs font-bold text-[#9dabb9] uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
+                            <thead class="bg-[#222831] text-[#9dabb9] sticky top-0 z-10 uppercase text-xs tracking-wider font-bold">
+                                <tr>
+                                    <th class="px-6 py-4 text-left">Household Head</th>
+                                    <th class="px-6 py-4 text-left">Zone/Purok</th>
+                                    <th class="px-6 py-4 text-center">Members</th>
+                                    <th class="px-6 py-4 text-left">Location</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody id="households-table-body" class="divide-y divide-[#283039] text-sm text-slate-300">
                                 <tr><td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">Loading data...</td></tr>
                             </tbody>
@@ -153,8 +149,8 @@ $user_role = htmlspecialchars($_SESSION['role']);
         </main>
     </div>
 
-    <div id="add-household-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4 transition-all duration-300">
-        <div class="bg-[#1c2127] w-full max-w-3xl p-0 rounded-2xl border border-[#283039] shadow-2xl transform scale-100 overflow-hidden flex flex-col max-h-[90vh]">
+    <div id="add-household-modal" class="fixed inset-0 z-[9999] grid place-items-center bg-black/80 hidden backdrop-blur-sm p-4 transition-all duration-300">
+        <div class="bg-[#1c2127] w-full max-w-3xl rounded-2xl border border-[#283039] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] relative">
             <div class="flex justify-between items-center p-5 border-b border-[#283039] bg-[#222831]">
                 <div class="flex items-center gap-3">
                     <div class="bg-primary/20 p-2 rounded-lg"><span class="material-symbols-outlined text-primary">add_location_alt</span></div>
@@ -166,12 +162,26 @@ $user_role = htmlspecialchars($_SESSION['role']);
                 <form id="add-household-form" class="flex flex-col gap-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="flex flex-col gap-1.5">
-                            <label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Household Head</label>
-                            <input type="text" name="household_head_name" required class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:outline-none">
+                            <label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Household Head Name</label>
+                            <input type="text" name="household_head_name" required placeholder="e.g. Juan Dela Cruz" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all">
                         </div>
                         <div class="flex flex-col gap-1.5">
                             <label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Zone / Purok</label>
-                            <input type="text" name="zone_purok" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:outline-none">
+                            <input type="text" name="zone_purok" placeholder="e.g. Zone 1" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Birthdate</label>
+                            <input type="date" name="birthdate" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:outline-none">
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Gender</label>
+                            <select name="gender" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:outline-none">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 rounded-lg border border-[#314d68] p-1 bg-[#111418]">
@@ -179,15 +189,15 @@ $user_role = htmlspecialchars($_SESSION['role']);
                         <div id="household-map" class="rounded-md border border-[#283039]"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Latitude</label><input type="text" id="latitude" name="latitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3 cursor-not-allowed font-mono"></div>
-                        <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Longitude</label><input type="text" id="longitude" name="longitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3 cursor-not-allowed font-mono"></div>
-                        <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Notes</label><input type="text" name="address_notes" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:outline-none"></div>
+                        <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Latitude</label><input type="text" id="latitude" name="latitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3 cursor-not-allowed font-mono"></div>
+                        <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Longitude</label><input type="text" id="longitude" name="longitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3 cursor-not-allowed font-mono"></div>
+                        <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9] uppercase tracking-wide">Address Notes</label><input type="text" name="address_notes" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-primary focus:outline-none"></div>
                     </div>
                 </form>
             </div>
             <div class="p-5 border-t border-[#283039] bg-[#222831] flex justify-end gap-3">
-                <button type="button" class="close-modal-btn px-5 py-2.5 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10">Cancel</button>
-                <button type="submit" form="add-household-form" class="bg-primary hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg">Save</button>
+                <button type="button" class="close-modal-btn px-5 py-2.5 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10 transition-colors">Cancel</button>
+                <button type="submit" form="add-household-form" class="bg-primary hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-105">Save Household</button>
             </div>
         </div>
     </div>
@@ -199,44 +209,25 @@ $user_role = htmlspecialchars($_SESSION['role']);
                 <button class="close-modal-btn text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
             </div>
             <form id="edit-household-form" class="flex flex-col gap-5">
-    <input type="hidden" id="edit_household_id" name="id">
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-[#9dabb9]">Household Head</label>
-            <input type="text" id="edit_head_name" name="household_head_name" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-yellow-500 focus:outline-none">
-        </div>
-        <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-[#9dabb9]">Zone / Purok</label>
-            <input type="text" id="edit_zone" name="zone_purok" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-yellow-500 focus:outline-none">
-        </div>
-    </div>
-
-    <div class="flex flex-col gap-2 rounded-lg border border-[#3b4754] p-1 bg-[#111418]">
-        <label class="text-xs font-medium text-[#9dabb9] px-2 pt-1">Update Location</label>
-        <div id="edit-household-map" class="rounded-md border border-[#283039]" style="height: 250px; width: 100%; z-index: 1;"></div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-[#9dabb9]">Latitude</label>
-            <input type="text" id="edit_latitude" name="latitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3 cursor-not-allowed font-mono">
-        </div>
-        <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-[#9dabb9]">Longitude</label>
-            <input type="text" id="edit_longitude" name="longitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3 cursor-not-allowed font-mono">
-        </div>
-        <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-[#9dabb9]">Address Notes</label>
-            <textarea id="edit_address" name="address_notes" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 focus:border-yellow-500 focus:outline-none resize-none"></textarea>
-        </div>
-    </div>
-
-    <div class="mt-4 flex gap-3 justify-end">
-        <button type="button" class="close-modal-btn px-5 py-2.5 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10">Cancel</button>
-        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg">Update Changes</button>
-    </div>
-</form>
+                <input type="hidden" id="edit_household_id" name="id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Head Name</label><input type="text" id="edit_head_name" name="household_head_name" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 w-full"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Zone</label><input type="text" id="edit_zone" name="zone_purok" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 w-full"></div>
+                </div>
+                <div class="flex flex-col gap-2 rounded-lg border border-[#3b4754] p-1 bg-[#111418]">
+                    <label class="text-xs font-medium text-[#9dabb9] px-2 pt-1">Update Location</label>
+                    <div id="edit-household-map"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Latitude</label><input type="text" id="edit_latitude" name="latitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Longitude</label><input type="text" id="edit_longitude" name="longitude" readonly class="bg-[#1c2127] border border-[#3b4754] text-gray-400 text-sm rounded-lg p-3"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[#9dabb9]">Notes</label><textarea id="edit_address" name="address_notes" class="bg-[#111418] border border-[#3b4754] text-white text-sm rounded-lg p-3 resize-none"></textarea></div>
+                </div>
+                <div class="mt-4 flex gap-3 justify-end">
+                    <button type="button" class="close-modal-btn px-5 py-2.5 rounded-lg text-sm font-bold text-slate-300 hover:bg-white/10">Cancel</button>
+                    <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg">Update</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -252,9 +243,37 @@ $user_role = htmlspecialchars($_SESSION['role']);
         </div>
     </div>
 
+    <div id="success-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-[#1c2127] w-full max-w-sm p-6 rounded-xl border border-green-500/30 shadow-2xl text-center">
+            <div class="mx-auto flex items-center justify-center size-14 rounded-full bg-green-500/20 mb-4">
+                <span class="material-symbols-outlined text-green-500 !text-3xl">check_circle</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Success!</h3>
+            <p class="text-slate-300 text-sm mb-6">Action completed successfully.</p>
+            <button class="close-modal-btn w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm px-5 py-2.5 transition-colors">
+                Okay, Great!
+            </button>
+        </div>
+    </div>
+
+    <div id="all-households-map-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 hidden backdrop-blur-sm p-4">
+        <div class="bg-[#1c2127] w-full max-w-6xl h-[85vh] rounded-2xl border border-[#283039] shadow-2xl flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-[#283039] bg-[#222831]">
+                <div class="flex items-center gap-3"><div class="bg-yellow-500/20 p-2 rounded-lg"><span class="material-symbols-outlined text-yellow-500">map</span></div><h3 class="text-xl font-bold text-white">Household Distribution Map</h3></div>
+                <button class="close-modal-btn text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div class="flex-1 relative">
+                <div id="all-households-map" class="w-full h-full bg-[#111418]"></div>
+                <div class="absolute bottom-4 left-4 bg-[#1c2127]/90 p-3 rounded-lg border border-[#3b4754] z-[500]">
+                    <p class="text-xs text-slate-400 font-bold mb-1">LEGEND</p>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500 border border-white"></span><span class="text-xs text-white">Household</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="assets/js/main.js?v=103"></script>
-
+    <script src="assets/js/main.js?v=113"></script>
 </body>
 </html>
