@@ -45,6 +45,10 @@ if (!file_exists($profile_pic)) $profile_pic = 'assets/img/default-avatar.png';
                     <a href="my_aid_history.php" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
                         <span class="material-symbols-outlined">receipt_long</span><p class="text-sm font-medium">Aid History</p>
                     </a>
+                    <a href="my_requests.php" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
+    <span class="material-symbols-outlined">campaign</span>
+    <p class="text-sm font-medium">My Requests</p>
+</a>
                 </div>
             </div>
             
@@ -55,7 +59,7 @@ if (!file_exists($profile_pic)) $profile_pic = 'assets/img/default-avatar.png';
                 </button>
 
                 <div class="flex flex-col gap-1">
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
+                    <a href="my_settings.php" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
                         <span class="material-symbols-outlined">settings</span>
                         <p class="text-sm font-medium">Settings</p>
                     </a>

@@ -1,45 +1,35 @@
 <?php
 // api/admin/get_all_requests.php
-include_once '../config/session.php';
-include_once '../config/db_connect.php';
 
 header('Content-Type: application/json');
+include_once '../config/db_connect.php';
 
-// Security: Admin Only
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
-}
-
-// Query: Get Requests + Resident Name + Household Location
+// We join 'assistance_requests' with 'residents' and 'households'
+// to get the Name and Location of the person asking for help.
 $sql = "SELECT 
-            ar.id,
-            ar.request_type,
-            ar.description,
-            ar.status,
-            ar.created_at,
-            r.first_name,
-            r.last_name,
-            h.household_head_name,
-            h.zone_purok,
-            h.latitude,
+            ar.id, 
+            ar.request_type, 
+            ar.description, 
+            ar.status, 
+            ar.created_at, 
+            ar.image_proof, 
+            res.first_name, 
+            res.last_name, 
+            h.address_notes AS zone_purok, 
+            h.latitude, 
             h.longitude
         FROM assistance_requests ar
-        JOIN residents r ON ar.resident_id = r.id
-        JOIN households h ON ar.household_id = h.id
-        ORDER BY 
-            CASE WHEN ar.status = 'Pending' THEN 1 ELSE 2 END, -- Show Pending first
-            ar.created_at DESC";
+        JOIN residents res ON ar.resident_id = res.id
+        LEFT JOIN households h ON ar.household_id = h.id
+        ORDER BY ar.created_at DESC";
 
 $result = $conn->query($sql);
 
-$requests = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $requests[] = $row;
-    }
+$data = [];
+while ($row = $result->fetch_assoc()) {
+    $data[] = $row;
 }
 
-echo json_encode($requests);
+echo json_encode($data);
 $conn->close();
 ?>

@@ -66,10 +66,14 @@ $(document).ready(function() {
     // ==========================================
     // 3. LOAD CENTERS FUNCTION
     // ==========================================
+    // ==========================================
+    // 3. LOAD CENTERS FUNCTION (UPDATED)
+    // ==========================================
     function loadCenters() {
         $.ajax({
             url: 'api/evacuation/get_centers.php',
-            type: 'GET', dataType: 'json',
+            type: 'GET',
+            dataType: 'json',
             success: function(data) {
                 var tbody = $('#centers-table-body');
                 tbody.empty();
@@ -92,7 +96,7 @@ $(document).ready(function() {
                     var locationDisplay = '<span class="text-slate-600 text-xs italic">No Pin</span>';
                     if (center.latitude && center.longitude) {
                         locationDisplay = `
-                            <a href="https://www.google.com/maps?q=${center.latitude},${center.longitude}" target="_blank" class="flex items-center gap-1 text-primary hover:text-white transition-colors group">
+                            <a href="http://maps.google.com/?q=${center.latitude},${center.longitude}" target="_blank" class="flex items-center gap-1 text-primary hover:text-white transition-colors group">
                                 <span class="material-symbols-outlined text-[16px] group-hover:animate-bounce">location_on</span>
                                 <span class="text-xs font-medium">View Map</span>
                             </a>`;
@@ -100,6 +104,7 @@ $(document).ready(function() {
 
                     var addressText = center.address ? center.address : '<span class="text-slate-600 italic text-xs">No Address</span>';
 
+                    // --- THIS IS THE UPDATED ROW HTML ---
                     var row = `
                         <tr class="border-b border-[#283039] hover:bg-[#222831] transition-colors">
                             <td class="px-6 py-4 text-white font-medium text-sm">${center.center_name}</td>
@@ -110,10 +115,18 @@ $(document).ready(function() {
                             <td class="px-6 py-4">${locationDisplay}</td>
                             <td class="px-6 py-4 text-right whitespace-nowrap">
                                 <div class="flex items-center justify-end gap-3">
-                                    <button onclick="window.openEditModal(${center.id})" class="text-slate-400 hover:text-yellow-400 transition-colors p-1">
+                                    
+                                    <a href="check_in.php?center_id=${center.id}&center_name=${encodeURIComponent(center.center_name)}" 
+                                       class="text-slate-400 hover:text-green-500 transition-colors p-1" 
+                                       title="Check In Resident">
+                                        <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+                                    </a>
+
+                                    <button onclick="window.openEditModal(${center.id})" class="text-slate-400 hover:text-yellow-400 transition-colors p-1" title="Edit Center">
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
                                     </button>
-                                    <button onclick="window.openDeleteModal(${center.id})" class="text-slate-400 hover:text-red-400 transition-colors p-1">
+
+                                    <button onclick="window.openDeleteModal(${center.id})" class="text-slate-400 hover:text-red-400 transition-colors p-1" title="Delete Center">
                                         <span class="material-symbols-outlined text-[20px]">delete</span>
                                     </button>
                                 </div>

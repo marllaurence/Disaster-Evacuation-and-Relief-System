@@ -94,6 +94,10 @@ if (!empty($profile_pic_url) && file_exists($profile_pic_url)) {
                         <span class="material-symbols-outlined">receipt_long</span>
                         <p class="text-sm font-medium">Aid History</p>
                     </a>
+                    <a href="my_requests.php" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
+                        <span class="material-symbols-outlined">campaign</span>
+                        <p class="text-sm font-medium">My Requests</p>
+                    </a>
                 </div>
             </div>
 
@@ -104,7 +108,7 @@ if (!empty($profile_pic_url) && file_exists($profile_pic_url)) {
                 </button>
 
                 <div class="flex flex-col gap-1">
-                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
+                    <a href="my_settings.php" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[#9dabb9] hover:bg-[#283039] hover:text-white transition-colors">
                         <span class="material-symbols-outlined">settings</span>
                         <p class="text-sm font-medium">Settings</p>
                     </a>
@@ -236,11 +240,33 @@ if (!empty($profile_pic_url) && file_exists($profile_pic_url)) {
                 <div class="flex items-center gap-3"><div class="bg-green-600/20 p-2 rounded-lg"><span class="material-symbols-outlined text-green-500">emergency_share</span></div><h3 class="text-xl font-bold text-white">Request Help</h3></div>
                 <button id="close-request-btn" class="text-slate-400 hover:text-white transition-colors"><span class="material-symbols-outlined">close</span></button>
             </div>
-            <form id="request-form" class="flex flex-col gap-4">
-                <div class="flex flex-col gap-1"><label class="text-xs font-medium text-slate-400">Type of Assistance</label><select name="request_type" required class="bg-[#111418] border border-[#314d68] text-white text-sm rounded-lg p-3 focus:border-green-500 focus:outline-none"><option value="" disabled selected>Select Request Type</option><option value="Food & Water">Food & Water</option><option value="Medical Assistance">Medical Assistance</option><option value="Rescue / Evacuation">Rescue / Evacuation</option><option value="Clothing / Shelter">Clothing / Shelter</option><option value="Other">Other</option></select></div>
-                <div class="flex flex-col gap-1"><label class="text-xs font-medium text-slate-400">Details</label><textarea name="description" required rows="4" class="bg-[#111418] border border-[#314d68] text-white text-sm rounded-lg p-3 focus:border-green-500 focus:outline-none resize-none" placeholder="Please describe your situation..."></textarea></div>
-                <div class="mt-2 p-3 bg-green-900/20 border border-green-900/50 rounded-lg flex gap-3 items-start"><span class="material-symbols-outlined text-green-500 text-sm mt-0.5">info</span><p class="text-xs text-green-200 leading-relaxed">Your location and contact info will be automatically sent to the command center.</p></div>
-                <div class="mt-4 flex gap-3"><button type="button" id="cancel-request-btn" class="flex-1 bg-[#283039] hover:bg-[#323c4a] text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center">Cancel</button><button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-lg shadow-green-900/20">Submit Request</button></div>
+            
+            <form id="request-form" class="flex flex-col gap-4" enctype="multipart/form-data">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-medium text-slate-400">Type of Assistance</label>
+                    <select name="request_type" required class="bg-[#111418] border border-[#314d68] text-white text-sm rounded-lg p-3 focus:border-green-500 focus:outline-none">
+                        <option value="" disabled selected>Select Request Type</option>
+                        <option value="Food & Water">Food & Water</option>
+                        <option value="Medical Assistance">Medical Assistance</option>
+                        <option value="Rescue / Evacuation">Rescue / Evacuation</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-medium text-slate-400">Details</label>
+                    <textarea name="description" required rows="3" class="bg-[#111418] border border-[#314d68] text-white text-sm rounded-lg p-3 focus:border-green-500 focus:outline-none resize-none" placeholder="Describe situation..."></textarea>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-xs font-medium text-slate-400">Attach Photo (Optional)</label>
+                    <input type="file" name="request_photo" accept="image/*" class="bg-[#111418] border border-[#314d68] text-white text-sm rounded-lg p-2 focus:border-green-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700">
+                </div>
+
+                <div class="mt-4 flex gap-3">
+                    <button type="button" id="cancel-request-btn" class="flex-1 bg-[#283039] text-white rounded-lg py-2.5">Cancel</button>
+                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg py-2.5 shadow-lg">Submit Request</button>
+                </div>
             </form>
         </div>
     </div>
@@ -252,9 +278,9 @@ if (!empty($profile_pic_url) && file_exists($profile_pic_url)) {
             <button id="close-success-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm px-5 py-2.5 transition-colors">Okay, Great!</button>
         </div>
     </div>
-<div id="evac-map-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 hidden backdrop-blur-sm p-4">
+
+    <div id="evac-map-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 hidden backdrop-blur-sm p-4">
         <div class="bg-[#1c2127] w-full max-w-4xl h-[80vh] rounded-xl border border-[#283039] shadow-2xl flex flex-col">
-            
             <div class="flex justify-between items-center p-4 border-b border-[#283039] bg-[#222831] shrink-0">
                 <div class="flex flex-col">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -268,16 +294,15 @@ if (!empty($profile_pic_url) && file_exists($profile_pic_url)) {
                     <button id="locate-me-btn" class="flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors shadow-lg">
                         <span class="material-symbols-outlined !text-[16px]">my_location</span> Locate Me
                     </button>
-
                     <button id="close-map-btn" class="text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-white/10">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
             </div>
-
             <div id="user-evac-map" class="flex-1 bg-[#111418] w-full h-full"></div>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="assets/js/my_dashboard.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

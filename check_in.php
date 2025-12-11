@@ -14,7 +14,9 @@ $user_full_name = htmlspecialchars($_SESSION['full_name']);
 $user_role = htmlspecialchars($_SESSION['role']);
 
 // --- THIS IS THE LINE YOU ARE MISSING ---
-$center_id = htmlspecialchars($_GET['id'] ?? 0);
+// New Code (Correct)
+// We check for 'center_id' because that matches the link in evacuation.js
+$center_id = htmlspecialchars($_GET['center_id'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html class="dark" lang="en">
@@ -59,50 +61,53 @@ $center_id = htmlspecialchars($_GET['id'] ?? 0);
 
     <div class="flex h-screen w-full">
     
-        <aside class="flex w-64 flex-col bg-[#1c2127] p-4 text-white">
-            <div class="flex flex-col gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-primary flex items-center justify-center">
-                        <span class="material-symbols-outlined">security</span>
+            <aside class="flex w-64 flex-col bg-[#1c2127] p-4 text-white">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 bg-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined">security</span>
+                        </div>
+                        <div class="flex flex-col">
+                            <h1 class="text-white text-base font-medium leading-normal"><?php echo $user_full_name; ?></h1>
+    <p class="text-[#9dabb9] text-sm font-normal leading-normal"><?php echo $user_role; ?></p>
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <h1 class="text-white text-base font-medium leading-normal"><?php echo $user_full_name; ?></h1>
-<p class="text-[#9dabb9] text-sm font-normal leading-normal"><?php echo $user_role; ?></p>
+                    
+                    <nav class="flex flex-col gap-2">
+                        <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="dashboard.php">
+                            <span class="material-symbols-outlined text-white">dashboard</span>
+                            <p class="text-white text-sm font-medium leading-normal">Dashboard</p>
+                        </a>
+                        <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="residents.php">
+                            <span class="material-symbols-outlined text-white">groups</span>
+                            <p class="text-white text-sm font-medium leading-normal">Residents</p>
+                        </a>
+                         <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/10" href="admin_requests.php">
+                        <span class="material-symbols-outlined group-hover:text-red-400 transition-colors">emergency_share</span><p class="text-sm font-medium">Requests</p>
+                    </a>
+                        <a class="flex items-center gap-3 rounded-lg bg-primary/20 px-3 py-2" href="evacuation.php">
+                            <span class="material-symbols-outlined text-primary">warehouse</span>
+                            <p class="text-primary text-sm font-medium leading-normal">Evacuation</p>
+                        </a>
+                        <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="relief.php">
+                            <span class="material-symbols-outlined text-white">volunteer_activism</span>
+                            <p class="text-white text-sm font-medium leading-normal">Relief</p>
+                        </a>
+                    </nav>
+                </div>
+                <div class="mt-auto flex flex-col gap-4">
+                    <div class="flex flex-col gap-1 border-t border-white/10 pt-4">
+                        <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="#">
+                            <span class="material-symbols-outlined text-white">settings</span>
+                            <p class="text-white text-sm font-medium leading-normal">Settings</p>
+                        </a>
+                        <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="api/auth/logout_process.php">
+                            <span class="material-symbols-outlined text-white">logout</span>
+                            <p class="text-white text-sm font-medium leading-normal">Logout</p>
+                        </a>
                     </div>
                 </div>
-                
-                <nav class="flex flex-col gap-2">
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="dashboard.php">
-                        <span class="material-symbols-outlined text-white">dashboard</span>
-                        <p class="text-white text-sm font-medium leading-normal">Dashboard</p>
-                    </a>
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="residents.php">
-                        <span class="material-symbols-outlined text-white">groups</span>
-                        <p class="text-white text-sm font-medium leading-normal">Residents</p>
-                    </a>
-                    <a class="flex items-center gap-3 rounded-lg bg-primary/20 px-3 py-2" href="evacuation.php">
-                        <span class="material-symbols-outlined text-primary">warehouse</span>
-                        <p class="text-primary text-sm font-medium leading-normal">Evacuation</p>
-                    </a>
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="relief.php">
-                        <span class="material-symbols-outlined text-white">volunteer_activism</span>
-                        <p class="text-white text-sm font-medium leading-normal">Relief</p>
-                    </a>
-                </nav>
-            </div>
-            <div class="mt-auto flex flex-col gap-4">
-                <div class="flex flex-col gap-1 border-t border-white/10 pt-4">
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="#">
-                        <span class="material-symbols-outlined text-white">settings</span>
-                        <p class="text-white text-sm font-medium leading-normal">Settings</p>
-                    </a>
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="api/auth/logout_process.php">
-                        <span class="material-symbols-outlined text-white">logout</span>
-                        <p class="text-white text-sm font-medium leading-normal">Logout</p>
-                    </a>
-                </div>
-            </div>
-        </aside>
+            </aside>
 
         <main class="flex flex-1 flex-col gap-6 p-6 overflow-y-auto">
             

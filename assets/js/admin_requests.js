@@ -10,6 +10,16 @@ let requestsMap;
 // 1. GLOBAL FUNCTIONS
 // ==========================================
 
+// Open Image Modal
+window.viewProof = function(imagePath) {
+    var modal = $('#proof-modal');
+    var img = $('#proof-image');
+    // Ensure path is correct
+    img.attr('src', imagePath);
+    modal.removeClass('hidden').addClass('flex');
+};
+
+// Open Status Update Modal
 window.openStatusModal = function(id, status) {
     targetRequestId = id;
     targetStatus = status;
@@ -37,11 +47,11 @@ window.openStatusModal = function(id, status) {
         msg.text('Move request to archive.');
         btn.addClass('bg-green-600 hover:bg-green-700').text('Complete Request');
     }
-    modal.removeClass('hidden');
+    modal.removeClass('hidden').addClass('flex');
 };
 
 // ==========================================
-// 2. MAP LOGIC (LIVE MAP)
+// 2. MAP LOGIC
 // ==========================================
 function initRequestsMap() {
     if (requestsMap) { requestsMap.invalidateSize(); return; }
@@ -52,12 +62,11 @@ function initRequestsMap() {
     requestsMap = L.map('requests-map', { center: [matiLat, matiLng], zoom: 13, minZoom: 11 });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(requestsMap);
     
-    // Loop through requests and plot
     allRequestsData.forEach(req => {
         if (req.latitude && req.longitude) {
-            var color = '#ef4444'; // Red (Pending)
-            if(req.status === 'In Progress') color = '#eab308'; // Yellow
-            if(req.status === 'Completed') color = '#22c55e'; // Green
+            var color = '#ef4444'; 
+            if(req.status === 'In Progress') color = '#eab308'; 
+            if(req.status === 'Completed') color = '#22c55e'; 
 
             var popup = `<b>${req.request_type}</b><br>${req.first_name} ${req.last_name}<br><i>${req.description}</i>`;
             
@@ -74,23 +83,31 @@ function initRequestsMap() {
 $(document).ready(function() {
     
     loadRequests();
-    setInterval(loadRequests, 30000); // Auto-refresh
+    setInterval(loadRequests, 30000); 
 
+    // Close Status Modal
     $('#cancel-status-btn').on('click', function() {
-        $('#status-modal').addClass('hidden');
+        $('#status-modal').addClass('hidden').removeClass('flex');
     });
 
+    // Confirm Status Update
     $('#confirm-status-btn').on('click', function() {
         performUpdate();
     });
 
-    // MAP BUTTON
+    // Close Proof Modal
+    $('#close-proof-btn').on('click', function() {
+        $('#proof-modal').addClass('hidden').removeClass('flex');
+    });
+
+    // Open Map
     $('#open-requests-map-btn').on('click', function() {
         $('#requests-map-modal').removeClass('hidden').addClass('flex');
         $('body').addClass('overflow-hidden');
         setTimeout(function() { initRequestsMap(); }, 300);
     });
 
+    // Close Map
     $('.close-modal-btn').on('click', function() {
         $('#requests-map-modal').addClass('hidden').removeClass('flex');
         $('body').removeClass('overflow-hidden');
@@ -111,7 +128,10 @@ function performUpdate() {
         data: { id: targetRequestId, status: targetStatus },
         dataType: 'json',
         success: function(res) {
-            if(res.success) { $('#status-modal').addClass('hidden'); loadRequests(); } 
+            if(res.success) { 
+                $('#status-modal').addClass('hidden').removeClass('flex'); 
+                loadRequests(); 
+            } 
             else { alert("Error: " + res.message); }
         },
         complete: function() { btn.text('Confirm').prop('disabled', false); }
@@ -126,36 +146,51 @@ function loadRequests() {
         success: function(data) {
             var tbody = $('#requests-table-body');
             tbody.empty();
-            allRequestsData = data; // Store for map
+            allRequestsData = data; 
 
-            if (data.length === 0) { tbody.html('<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500 italic">No active requests.</td></tr>'); return; }
+            if (data.length === 0) { tbody.html('<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500 italic">No active requests.</td></tr>'); return; }
 
             data.forEach(function(req) {
+                // Status Badge
                 var statusBadge = '';
                 if(req.status === 'Pending') statusBadge = '<span class="bg-red-500/10 text-red-400 px-2 py-1 rounded border border-red-500/20 text-[10px] uppercase font-bold">Pending</span>';
                 else if(req.status === 'In Progress') statusBadge = '<span class="bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded border border-yellow-500/20 text-[10px] uppercase font-bold">In Progress</span>';
                 else statusBadge = '<span class="bg-green-500/10 text-green-400 px-2 py-1 rounded border border-green-500/20 text-[10px] uppercase font-bold">Completed</span>';
 
+                // Actions Buttons
                 var actions = '';
                 if(req.status === 'Pending') actions = `<button onclick="window.openStatusModal(${req.id}, 'In Progress')" class="text-white bg-yellow-600 hover:bg-yellow-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">ACCEPT</button>`;
                 else if (req.status === 'In Progress') actions = `<button onclick="window.openStatusModal(${req.id}, 'Completed')" class="text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">DONE</button>`;
                 else actions = `<span class="text-slate-600 text-xs italic">Archived</span>`;
 
-                var loc = (req.latitude && req.longitude) ? `<a href="https://www.google.com/maps?q=${req.latitude},${req.longitude}" target="_blank" class="flex items-center gap-1 text-primary hover:text-white text-xs font-bold uppercase"><span class="material-symbols-outlined text-[16px]">location_on</span> Map</a>` : `<span class="text-slate-500 text-xs">No GPS</span>`;
+                // Location Link
+                var loc = (req.latitude && req.longitude) ? `<a href="http://maps.google.com/?q=${req.latitude},${req.longitude}" target="_blank" class="flex items-center gap-1 text-primary hover:text-white text-xs font-bold uppercase mt-1"><span class="material-symbols-outlined text-[16px]">location_on</span> Map</a>` : ``;
+
+                // Photo Button
+                var photoBtn = '<span class="text-slate-600 text-xs">No Photo</span>';
+                if (req.image_proof && req.image_proof !== 'NULL' && req.image_proof !== '') {
+                    // Pass the image path to the view function
+                    photoBtn = `<button onclick="window.viewProof('${req.image_proof}')" class="text-blue-400 hover:text-white text-xs font-bold border border-blue-500/30 hover:bg-blue-600 px-2 py-1 rounded flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">image</span> View</button>`;
+                }
 
                 tbody.append(`
                     <tr class="hover:bg-[#222831] transition-colors border-b border-[#283039]">
-                        <td class="px-6 py-4 font-medium text-white">${req.first_name} ${req.last_name}<div class="text-[10px] text-slate-500">${new Date(req.created_at).toLocaleString()}</div></td>
-                        <td class="px-6 py-4"><div class="text-slate-300 text-xs font-bold">${req.zone_purok || 'Unknown'}</div>${loc}</td>
-                        <td class="px-6 py-4 text-slate-300 text-sm">${req.request_type}</td>
+                        <td class="px-6 py-4 font-medium text-white">
+                            ${req.first_name} ${req.last_name}
+                            <div class="text-[10px] text-slate-500">${new Date(req.created_at).toLocaleString()}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-slate-300 text-xs font-bold">${req.zone_purok || 'Unknown'}</div>
+                            ${loc}
+                        </td>
+                        <td class="px-6 py-4 text-slate-300 text-sm font-bold">${req.request_type}</td>
                         <td class="px-6 py-4 text-slate-400 text-sm max-w-xs truncate" title="${req.description}">${req.description}</td>
-                        <td class="px-6 py-4 text-center">${statusBadge}</td>
+                        <td class="px-6 py-4 text-center">${photoBtn}</td> <td class="px-6 py-4 text-center">${statusBadge}</td>
                         <td class="px-6 py-4 text-right flex justify-end">${actions}</td>
                     </tr>
                 `);
             });
             
-            // Refresh Map if open
             if(requestsMap) { requestsMap.eachLayer(l => { if(l instanceof L.CircleMarker) requestsMap.removeLayer(l); }); initRequestsMap(); }
         }
     });

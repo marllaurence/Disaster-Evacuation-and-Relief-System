@@ -1,79 +1,62 @@
 <?php
-// Include the session manager
+// api/resident/upload_profile_pic.php
+ob_start(); // Prevent HTML garbage
 include_once '../config/session.php';
 include_once '../config/db_connect.php';
 
 header('Content-Type: application/json');
-$response = array('success' => false, 'message' => 'An error occurred.');
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
 
-// "No Loophole" Bouncer: Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    $response['message'] = 'Authentication required.';
-    echo json_encode($response);
-    exit;
-}
+$response = array('success' => false, 'message' => 'Unknown error.');
 
-// Get the logged-in user's ID
-$user_id = $_SESSION['user_id'];
+try {
+    if (!isset($_SESSION['user_id'])) throw new Exception("Please log in again.");
 
-// Check if a file was uploaded
-if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] == 0) {
-    
-    $file = $_FILES['profile_pic'];
+    $user_id = $_SESSION['user_id'];
 
-    // --- 1. File Validation ---
-    $allowed_types = ['image/jpeg', 'image/png'];
-    $max_size = 5 * 1024 * 1024; // 5 MB
-
-    if (!in_array($file['type'], $allowed_types)) {
-        $response['message'] = 'Invalid file type. Only JPG and PNG are allowed.';
-    } elseif ($file['size'] > $max_size) {
-        $response['message'] = 'File is too large. Maximum size is 5 MB.';
-    } else {
-        
-        // --- 2. Create Secure Filename & Path ---
-        $upload_dir = '../../uploads/'; // Go up two levels, then into "uploads/"
-        
-        // Make sure the uploads directory exists
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-
-        // Create a unique, secure name: "user_1_timestamp.jpg"
-        $file_extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $new_filename = 'user_' . $user_id . '_' . time() . '.' . $file_extension;
-        $file_path = $upload_dir . $new_filename;
-
-        // --- 3. Move the File ---
-        if (move_uploaded_file($file['tmp_name'], $file_path)) {
-            
-            // --- 4. Update the Database ---
-            // The path to store in the DB should be from the root
-            $db_path = 'uploads/' . $new_filename; 
-            
-            $stmt = $conn->prepare("UPDATE users SET profile_picture_url = ? WHERE id = ?");
-            $stmt->bind_param("si", $db_path, $user_id);
-            
-            if ($stmt->execute()) {
-                // --- 5. Success! Update Session & Send Response ---
-                $_SESSION['profile_picture_url'] = $db_path; // Update session
-                
-                $response['success'] = true;
-                $response['message'] = 'Profile picture updated!';
-                $response['new_path'] = $db_path;
-            } else {
-                $response['message'] = 'Database error: ' . $stmt->error;
-            }
-            $stmt->close();
-            
-        } else {
-            $response['message'] = 'Failed to save the uploaded file.';
-        }
+    if (!isset($_FILES['profile_pic']) || $_FILES['profile_pic']['error'] != 0) {
+        throw new Exception("No file received.");
     }
-} else {
-    $response['message'] = 'No file was uploaded or an error occurred.';
+
+    $file = $_FILES['profile_pic'];
+    
+    // Absolute paths
+    $root_dir = dirname(__DIR__, 2); 
+    $upload_dir = $root_dir . '/uploads/';
+
+    if (!is_dir($upload_dir)) {
+        if (!mkdir($upload_dir, 0777, true)) throw new Exception("Failed to create uploads folder.");
+    }
+
+    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $new_filename = 'user_' . $user_id . '_' . time() . '.' . $ext;
+    $destination = $upload_dir . $new_filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $destination)) {
+        throw new Exception("Failed to move file.");
+    }
+
+    $db_path = 'uploads/' . $new_filename;
+
+    $stmt = $conn->prepare("UPDATE users SET profile_picture_url = ? WHERE id = ?");
+    $stmt->bind_param("si", $db_path, $user_id);
+    
+    if ($stmt->execute()) {
+        $_SESSION['profile_picture_url'] = $db_path;
+        $response['success'] = true;
+        $response['message'] = 'Upload successful!';
+        $response['new_path'] = $db_path;
+    } else {
+        throw new Exception("Database update failed.");
+    }
+    $stmt->close();
+
+} catch (Exception $e) {
+    $response['message'] = $e->getMessage();
 }
 
-$conn->close();
+ob_end_clean();
 echo json_encode($response);
+$conn->close();
 ?>

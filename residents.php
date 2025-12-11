@@ -48,49 +48,56 @@ $user_role = htmlspecialchars($_SESSION['role']);
 <body class="bg-background-light dark:bg-background-dark font-display text-white overflow-hidden">
     <div class="flex h-screen w-full">
         
-        <aside class="flex w-64 flex-col bg-[#1c2127] border-r border-[#283039] shrink-0 transition-all duration-300">
-            <div class="flex flex-col gap-6 p-6">
+        <aside class="flex w-64 flex-col bg-[#1c2127] p-4 text-white border-r border-[#283039] shrink-0 transition-all duration-300">
+            <div class="flex flex-col gap-4">
                 <div class="flex items-center gap-3">
                     <div class="bg-gradient-to-br from-primary to-blue-600 aspect-square rounded-xl size-10 flex items-center justify-center shadow-lg shadow-blue-900/20">
                         <span class="material-symbols-outlined text-white">security</span>
                     </div>
                     <div class="flex flex-col">
-                        <h1 class="text-white text-sm font-bold tracking-wide"><?php echo $user_full_name; ?></h1>
-                        <p class="text-[#9dabb9] text-xs font-medium uppercase tracking-wider"><?php echo $user_role; ?></p>
+                        <h1 class="text-white text-base font-medium leading-normal"><?php echo $user_full_name; ?></h1>
+                        <p class="text-[#9dabb9] text-sm font-normal leading-normal capitalize"><?php echo $user_role; ?></p>
                     </div>
                 </div>
                 
-                <nav class="flex flex-col gap-1">
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="dashboard.php">
-                        <span class="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
-                        <p class="text-sm font-medium">Dashboard</p>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="dashboard.php">
+                        <span class="material-symbols-outlined text-white">dashboard</span>
+                        <p class="text-white text-sm font-medium">Dashboard</p>
                     </a>
-                    <a class="flex items-center gap-3 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2.5 text-white" href="residents.php">
-                        <span class="material-symbols-outlined text-primary">groups</span>
-                        <p class="text-sm font-medium">Residents</p>
+
+                    <a class="flex items-center gap-3 rounded-lg bg-primary/20 px-3 py-2" href="residents.php">
+                        <span class="material-symbols-outlined text-primary fill">groups</span>
+                        <p class="text-primary text-sm font-medium">Residents</p>
                     </a>
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="admin_requests.php">
+
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/10" href="admin_requests.php">
                         <span class="material-symbols-outlined group-hover:text-red-400 transition-colors">emergency_share</span>
                         <p class="text-sm font-medium">Requests</p>
                     </a>
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="evacuation.php">
-                        <span class="material-symbols-outlined group-hover:text-orange-400 transition-colors">warehouse</span>
-                        <p class="text-sm font-medium">Evacuation</p>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="evacuation.php">
+                        <span class="material-symbols-outlined text-white">warehouse</span>
+                        <p class="text-white text-sm font-medium">Evacuation</p>
                     </a>
-                    <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/5 text-[#9dabb9] hover:text-white transition-all group" href="relief.php">
-                        <span class="material-symbols-outlined group-hover:text-green-400 transition-colors">volunteer_activism</span>
-                        <p class="text-sm font-medium">Relief</p>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="relief.php">
+                        <span class="material-symbols-outlined text-white">volunteer_activism</span>
+                        <p class="text-white text-sm font-medium">Relief</p>
                     </a>
                 </nav>
             </div>
-            <div class="mt-auto p-6 border-t border-[#283039]">
-                <a class="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-red-500/10 text-[#9dabb9] hover:text-red-400 transition-all" href="api/auth/logout_process.php">
-                    <span class="material-symbols-outlined">logout</span>
-                    <p class="text-sm font-medium">Logout</p>
-                </a>
+            <div class="mt-auto flex flex-col gap-4">
+                <div class="flex flex-col gap-1 border-t border-white/10 pt-4">
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="#">
+                        <span class="material-symbols-outlined text-white">settings</span>
+                        <p class="text-white text-sm font-medium">Settings</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-white/10" href="api/auth/logout_process.php">
+                        <span class="material-symbols-outlined text-white">logout</span>
+                        <p class="text-white text-sm font-medium">Logout</p>
+                    </a>
+                </div>
             </div>
         </aside>
-
         <main class="flex flex-1 flex-col h-screen overflow-hidden bg-background-dark relative">
             <header class="flex justify-between items-center p-6 lg:p-8 border-b border-[#283039] bg-[#1c2127]/50 backdrop-blur-sm sticky top-0 z-10">
                 <div>

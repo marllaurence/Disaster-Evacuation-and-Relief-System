@@ -20,8 +20,7 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Helper: Count as Active if 'is_deleted' is 0 OR NULL (Empty)
-// This fixes the "0 Stats" issue if you haven't updated old records yet.
+// Helper: Count as Active if 'is_deleted' is 0 OR NULL
 $active_check = "(is_deleted = 0 OR is_deleted IS NULL)";
 
 try {
@@ -36,7 +35,6 @@ try {
     if ($result) $response["total_residents"] = (int)$result->fetch_assoc()["total"];
 
     // --- 3. RESIDENTS EVACUATED ---
-    // Must be active resident AND currently checked in (no check-out time)
     $sql = "SELECT COUNT(*) AS total 
             FROM evacuees e
             JOIN residents r ON e.resident_id = r.id
@@ -45,12 +43,16 @@ try {
     $result = $conn->query($sql);
     if ($result) $response["residents_evacuated"] = (int)$result->fetch_assoc()["total"];
 
-    // --- 4. AFFECTED HOUSEHOLDS ---
-    // Households that are Active AND (Evacuated OR Requesting Help)
-    $sql = "SELECT COUNT(DISTINCT h.id) as total 
-            FROM households h
-            LEFT JOIN evacuees e ON h.id = e.household_id AND e.time_checked_out IS NULL
-            LEFT JOIN assistance_requests ar ON h.id = ar.household_id AND ar.status = 'Pending'
+    // --- 4. AFFECTED HOUSEHOLDS (FIXED) ---
+    // We now count the DISTINCT Household ID by looking at the Residents.
+    // A Household is affected if any member is:
+    // A) Currently in 'evacuees' (Checked In)
+    // B) OR has a request that is 'Pending' or 'In Progress'
+    
+    $sql = "SELECT COUNT(DISTINCT r.household_id) as total 
+            FROM residents r
+            LEFT JOIN evacuees e ON r.id = e.resident_id AND e.time_checked_out IS NULL
+            LEFT JOIN assistance_requests ar ON r.id = ar.resident_id AND ar.status IN ('Pending', 'In Progress')
             WHERE ($active_check) 
             AND (e.id IS NOT NULL OR ar.id IS NOT NULL)";
 
@@ -58,7 +60,7 @@ try {
     if ($result) $response["affected_households"] = (int)$result->fetch_assoc()["total"];
 
 } catch (Exception $e) {
-    // If table columns are missing, it might return 0, but won't crash the page
+    // Fail silently with 0s
 }
 
 echo json_encode($response);

@@ -255,19 +255,46 @@ $(document).ready(function() {
         $('body').addClass('overflow-hidden');
     });
 
+   // Request Assistance Submit Logic
     $('#request-form').on('submit', function(e) {
         e.preventDefault();
+        
+        // 1. visual feedback (Disable button so they don't click twice)
         var btn = $(this).find('button[type="submit"]');
-        btn.text('Sending...').prop('disabled', true);
+        var originalText = btn.text();
+        btn.prop('disabled', true).text('Sending...');
+
+        var formData = new FormData(this);
+
         $.ajax({
-            url: 'api/resident/submit_request.php', type: 'POST', data: $(this).serialize(), dataType: 'json',
-            success: function(res) {
-                if (res.success) {
-                    $('#request-modal').addClass('hidden'); $('#request-form')[0].reset(); $('body').removeClass('overflow-hidden');
-                    $('#success-modal h3').text('Request Sent!'); $('#success-modal p').text('Help is on the way.'); $('#success-modal').removeClass('hidden');
-                } else { alert(res.message); }
+            url: 'api/resident/submit_request.php',
+            type: 'POST',
+            data: formData,
+            contentType: false, // REQUIRED for files
+            processData: false, // REQUIRED for files
+            dataType: 'json',   // Expect JSON back
+            success: function(response) {
+                if (response.success) {
+                    // A. Hide the Request Input Modal
+                    $('#request-modal').addClass('hidden');
+                    
+                    // B. Show the Success Message Modal
+                    $('#success-modal').removeClass('hidden');
+                    
+                    // C. Clear the form for next time
+                    $('#request-form')[0].reset();
+                } else {
+                    alert("Server Error: " + response.message);
+                }
             },
-            complete: function() { btn.text('Submit Request').prop('disabled', false); }
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                alert("System Error. Check console (F12) for details.");
+            },
+            complete: function() {
+                // Re-enable the button
+                btn.prop('disabled', false).text(originalText);
+            }
         });
     });
 

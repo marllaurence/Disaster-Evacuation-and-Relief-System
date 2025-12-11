@@ -91,10 +91,17 @@ $user_role = htmlspecialchars($_SESSION['role']);
 
         <main class="flex flex-1 flex-col h-screen overflow-hidden bg-background-dark relative">
             <header class="flex justify-between items-center p-6 lg:p-8 border-b border-[#283039] bg-[#1c2127]/50 backdrop-blur-sm sticky top-0 z-10">
-                <div><h1 class="text-2xl font-bold text-white tracking-tight">Emergency Requests</h1><p class="text-sm text-[#9dabb9]">Manage incoming calls for help from residents.</p></div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white tracking-tight">Emergency Requests</h1>
+                    <p class="text-sm text-[#9dabb9]">Manage incoming calls for help from residents.</p>
+                </div>
                 <div class="flex gap-3">
-                    <button id="open-requests-map-btn" class="bg-[#e3a008] hover:bg-yellow-600 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:scale-[1.02] active:scale-95"><span class="material-symbols-outlined">map</span> Live Map</button>
-                    <button onclick="loadRequests()" class="flex items-center gap-2 text-sm font-bold text-primary hover:text-white transition-colors bg-[#283039] hover:bg-[#3b4754] px-4 py-2.5 rounded-lg"><span class="material-symbols-outlined text-[18px]">refresh</span> Refresh</button>
+                    <button id="open-requests-map-btn" class="bg-[#e3a008] hover:bg-yellow-600 text-white font-semibold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-all shadow-lg hover:scale-[1.02] active:scale-95">
+                        <span class="material-symbols-outlined">map</span> Live Map
+                    </button>
+                    <button onclick="loadRequests()" class="flex items-center gap-2 text-sm font-bold text-primary hover:text-white transition-colors bg-[#283039] hover:bg-[#3b4754] px-4 py-2.5 rounded-lg">
+                        <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+                    </button>
                 </div>
             </header>
 
@@ -103,9 +110,19 @@ $user_role = htmlspecialchars($_SESSION['role']);
                     <div class="overflow-auto flex-1">
                         <table class="w-full text-left border-collapse">
                             <thead class="bg-[#222831] text-[#9dabb9] sticky top-0 z-10 uppercase text-xs tracking-wider font-semibold">
-                                <tr><th class="px-6 py-4 border-b border-[#283039] text-left">Resident</th><th class="px-6 py-4 border-b border-[#283039] text-left">Location</th><th class="px-6 py-4 border-b border-[#283039] text-left">Type</th><th class="px-6 py-4 border-b border-[#283039] text-left">Message</th><th class="px-6 py-4 border-b border-[#283039] text-center">Status</th><th class="px-6 py-4 border-b border-[#283039] text-right">Action</th></tr>
+                                <tr>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-left">Resident</th>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-left">Location</th>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-left">Type</th>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-left">Message</th>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-center">Proof</th>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-center">Status</th>
+                                    <th class="px-6 py-4 border-b border-[#283039] text-right">Action</th>
+                                </tr>
                             </thead>
-                            <tbody id="requests-table-body" class="divide-y divide-[#283039] text-sm text-slate-300"><tr><td colspan="6" class="px-6 py-8 text-center text-slate-500 italic">Loading requests...</td></tr></tbody>
+                            <tbody id="requests-table-body" class="divide-y divide-[#283039] text-sm text-slate-300">
+                                <tr><td colspan="7" class="px-6 py-8 text-center text-slate-500 italic">Loading requests...</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -118,7 +135,10 @@ $user_role = htmlspecialchars($_SESSION['role']);
             <div id="status-icon-bg" class="mx-auto flex items-center justify-center size-14 rounded-full mb-4 transition-colors"><span id="status-icon" class="material-symbols-outlined !text-3xl"></span></div>
             <h3 id="status-title" class="text-xl font-bold text-white mb-2">Update Status?</h3>
             <p id="status-message" class="text-[#9dabb9] text-sm mb-6">Are you sure you want to proceed?</p>
-            <div class="flex gap-3 justify-center"><button id="cancel-status-btn" class="px-5 py-2.5 rounded-lg text-sm font-bold text-[#9dabb9] hover:text-white hover:bg-[#283039] transition-colors">Cancel</button><button id="confirm-status-btn" class="text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center gap-2">Confirm</button></div>
+            <div class="flex gap-3 justify-center">
+                <button id="cancel-status-btn" class="px-5 py-2.5 rounded-lg text-sm font-bold text-[#9dabb9] hover:text-white hover:bg-[#283039] transition-colors">Cancel</button>
+                <button id="confirm-status-btn" class="text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg transition-transform active:scale-95 flex items-center gap-2">Confirm</button>
+            </div>
         </div>
     </div>
 
@@ -140,8 +160,17 @@ $user_role = htmlspecialchars($_SESSION['role']);
         </div>
     </div>
 
+    <div id="proof-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 hidden backdrop-blur-sm p-4" onclick="document.getElementById('proof-modal').classList.add('hidden'); document.getElementById('proof-modal').classList.remove('flex');">
+        <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center" onclick="event.stopPropagation();">
+            <button id="close-proof-btn" class="absolute -top-10 right-0 text-white hover:text-red-500 transition-colors bg-black/50 rounded-full p-1">
+                <span class="material-symbols-outlined !text-3xl">close</span>
+            </button>
+            <img id="proof-image" src="" alt="Proof of Request" class="rounded-lg shadow-2xl max-h-[85vh] object-contain border border-[#314d68] bg-black">
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="assets/js/admin_requests.js"></script>
+    <script src="assets/js/admin_requests.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>

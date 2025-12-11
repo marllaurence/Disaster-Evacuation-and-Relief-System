@@ -6,7 +6,11 @@ $id = $_POST['id'] ?? '';
 $center_name = $_POST['center_name'] ?? '';
 $address = $_POST['address'] ?? '';
 $capacity = $_POST['capacity'] ?? '';
-$is_active = isset($_POST['is_active']) ? 1 : 0;
+
+// --- FIX IS HERE ---
+// We check if it is set AND if the value is explicitly "1".
+// If the value is "0" (which your JS sends), this will now correctly return 0.
+$is_active = (isset($_POST['is_active']) && $_POST['is_active'] == 1) ? 1 : 0;
 
 if (!$id || !$center_name || !$capacity) {
     echo json_encode(["success" => false, "message" => "Missing required fields"]);
