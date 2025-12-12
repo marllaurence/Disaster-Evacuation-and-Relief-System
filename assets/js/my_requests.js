@@ -1,10 +1,9 @@
 $(document).ready(function() {
 
     // ==========================================
-    // 1. LOAD REQUESTS FUNCTION
+    // 1. LOAD REQUESTS FUNCTION (UPDATED)
     // ==========================================
     function loadRequests() {
-        // Add a timestamp (?v=time) to URL to prevent browser caching
         const noCacheUrl = 'api/resident/get_my_requests.php?v=' + new Date().getTime();
 
         $.ajax({
@@ -15,14 +14,14 @@ $(document).ready(function() {
                 var container = $('#requests-container');
                 container.empty();
 
-                // Check if the server returned success and has data
                 if (response.success && response.data && response.data.length > 0) {
                     
                     response.data.forEach(function(req) {
                         
-                        // --- Status Styles ---
+                        // --- Status Logic ---
                         let statusColor, statusIcon, statusText;
-                        
+                        let rejectionHtml = ''; // Variable for the rejection message
+
                         if (req.status === 'Pending') {
                             statusColor = 'border-l-yellow-500 text-yellow-500';
                             statusIcon = 'pending';
@@ -35,43 +34,47 @@ $(document).ready(function() {
                             statusColor = 'border-l-green-500 text-green-400';
                             statusIcon = 'check_circle';
                             statusText = 'Resolved';
-                        } else {
-                            // Rejected or Cancelled
+                        } else if (req.status === 'Rejected') {
+                            // --- REJECTED LOGIC ---
                             statusColor = 'border-l-red-500 text-red-400';
                             statusIcon = 'cancel';
                             statusText = 'Request Rejected';
+                            
+                            // Create the Red Box for the reason
+                            let reasonText = req.rejection_reason || 'No specific reason provided.';
+                            rejectionHtml = `
+                                <div class="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                    <p class="text-xs font-bold text-red-400 uppercase flex items-center gap-1">
+                                        <span class="material-symbols-outlined !text-[16px]">report</span> 
+                                        Why was this rejected?
+                                    </p>
+                                    <p class="text-sm text-slate-300 mt-1 italic">"${reasonText}"</p>
+                                </div>
+                            `;
+                        } else {
+                            statusColor = 'border-l-slate-500 text-slate-400';
+                            statusIcon = 'archive';
+                            statusText = 'Archived';
                         }
 
-                        // --- Image Logic ---
+                        // --- Image Logic (Same as before) ---
                         let imageHtml = '';
-                        
-                        // Check if image path exists in DB and is not empty/NULL
                         if (req.image_proof && req.image_proof.trim() !== "") {
-                            
-                            // Use path exactly as it comes from DB (e.g. "uploads/requests/req_41_....jpg")
                             let finalPath = req.image_proof; 
-
                             imageHtml = `
                                 <div class="mt-3 pt-3 border-t border-[#283039]">
                                     <p class="text-xs text-slate-500 mb-2 font-bold uppercase">Attached Proof</p>
-                                    
                                     <a href="${finalPath}" target="_blank" class="block w-full h-32 rounded-lg overflow-hidden border border-[#314d68] relative group">
-                                        <img src="${finalPath}" 
-                                             class="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                             alt="Proof"
-                                             onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div class=\'h-full w-full flex items-center justify-center bg-red-900/20 text-red-400 text-xs\'>File not found</div>';">
-                                        
+                                        <img src="${finalPath}" class="w-full h-full object-cover transition-transform group-hover:scale-105" onerror="this.parentElement.innerHTML='<div class=\'h-full w-full flex items-center justify-center bg-red-900/20 text-red-400 text-xs\'>File not found</div>';">
                                         <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span class="text-white text-xs font-bold flex items-center gap-1">
-                                                <span class="material-symbols-outlined text-[16px]">visibility</span> View Full
-                                            </span>
+                                            <span class="text-white text-xs font-bold flex items-center gap-1">View Full</span>
                                         </div>
                                     </a>
                                 </div>
                             `;
                         }
 
-                        // --- Build the Card HTML ---
+                        // --- Build Card ---
                         var html = `
                             <div class="bg-[#1a222c] rounded-lg border border-[#283039] border-l-4 ${statusColor} p-5 shadow-lg relative overflow-hidden group transition-all hover:bg-[#202935] mb-4">
                                 <div class="flex justify-between items-start mb-2">
@@ -88,7 +91,7 @@ $(document).ready(function() {
                                     "${req.description}"
                                 </p>
 
-                                ${imageHtml} 
+                                ${rejectionHtml} ${imageHtml} 
                                 
                                 <div class="mt-3 flex items-center gap-2 text-xs font-medium ${statusColor.split(' ')[1]} opacity-80">
                                     <span class="material-symbols-outlined text-[16px]">info</span>
@@ -100,22 +103,11 @@ $(document).ready(function() {
                     });
 
                 } else {
-                    // Success but empty list OR success=false
-                    container.html(`
-                        <div class="flex flex-col items-center justify-center py-12 text-slate-500 border border-dashed border-[#314d68] rounded-xl">
-                            <span class="material-symbols-outlined text-4xl mb-2 opacity-50">inbox</span>
-                            <p>No assistance requests found.</p>
-                        </div>
-                    `);
+                    container.html('<div class="col-span-full text-center py-20 text-slate-500">No requests found.</div>');
                 }
             },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error:", xhr.responseText);
-                $('#requests-container').html(`
-                    <div class="text-center text-red-400 py-4 border border-red-900/50 bg-red-900/10 rounded">
-                        <p>System Error: Could not load requests.</p>
-                    </div>
-                `);
+            error: function() {
+                $('#requests-container').html('<div class="col-span-full text-center py-20 text-red-400">Error loading requests.</div>');
             }
         });
     }

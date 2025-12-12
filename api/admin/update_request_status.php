@@ -1,32 +1,37 @@
 <?php
 // api/admin/update_request_status.php
-include_once '../config/session.php';
-include_once '../config/db_connect.php';
 
 header('Content-Type: application/json');
+include_once '../config/db_connect.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+// 1. Get Input
+$id = $_POST['id'] ?? null;
+$status = $_POST['status'] ?? null;
+$reason = $_POST['reason'] ?? null; // Get the rejection reason
+
+if (!$id || !$status) {
+    echo json_encode(['success' => false, 'message' => 'Missing ID or Status']);
     exit;
 }
 
-$request_id = $_POST['id'] ?? 0;
-$new_status = $_POST['status'] ?? '';
-
-if (empty($request_id) || empty($new_status)) {
-    echo json_encode(['success' => false, 'message' => 'Invalid input']);
-    exit;
+// 2. Prepare Query
+// We use dynamic SQL to only update rejection_reason if it's provided
+if ($status === 'Rejected' && !empty($reason)) {
+    $sql = "UPDATE assistance_requests SET status = ?, rejection_reason = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssi", $status, $reason, $id);
+} else {
+    $sql = "UPDATE assistance_requests SET status = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $status, $id);
 }
 
-$stmt = $conn->prepare("UPDATE assistance_requests SET status = ? WHERE id = ?");
-$stmt->bind_param("si", $new_status, $request_id);
-
+// 3. Execute
 if ($stmt->execute()) {
     echo json_encode(['success' => true]);
 } else {
-    echo json_encode(['success' => false, 'message' => 'Database error']);
+    echo json_encode(['success' => false, 'message' => $conn->error]);
 }
 
-$stmt->close();
 $conn->close();
 ?>

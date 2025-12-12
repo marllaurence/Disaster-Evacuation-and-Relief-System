@@ -168,7 +168,26 @@ $user_role = htmlspecialchars($_SESSION['role']);
             <img id="proof-image" src="" alt="Proof of Request" class="rounded-lg shadow-2xl max-h-[85vh] object-contain border border-[#314d68] bg-black">
         </div>
     </div>
-
+<div id="reject-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4 transition-opacity duration-300">
+        <div class="bg-[#1c2127] w-full max-w-md p-6 rounded-xl border border-red-500/30 shadow-2xl flex flex-col transform scale-100 transition-transform duration-300">
+            <div class="flex justify-between items-center mb-4 border-b border-[#283039] pb-3">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-red-500">report</span> 
+                    Reject Request?
+                </h3>
+                <button id="close-reject-btn" class="text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            
+            <p class="text-sm text-slate-400 mb-2">Please provide a reason for rejecting this request. This will be visible to the resident.</p>
+            
+            <textarea id="reject-reason-input" rows="4" class="w-full bg-[#111418] border border-[#314d68] rounded-lg p-3 text-white text-sm focus:border-red-500 focus:outline-none resize-none mb-4" placeholder="e.g., Duplicate request, Insufficient proof..."></textarea>
+            
+            <div class="flex gap-3 justify-end">
+                <button id="cancel-reject-btn" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:bg-[#283039] transition-colors">Cancel</button>
+                <button id="confirm-reject-btn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg transition-transform active:scale-95">Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="assets/js/admin_requests.js?v=<?php echo time(); ?>"></script>

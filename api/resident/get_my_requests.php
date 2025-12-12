@@ -40,8 +40,8 @@ if (empty($resident_id)) {
     exit;
 }
 
-// 4. FETCH REQUESTS
-$sql = "SELECT id, request_type, description, status, image_proof, created_at 
+// Change this line in get_my_requests.php
+$sql = "SELECT id, request_type, description, status, rejection_reason, image_proof, created_at 
         FROM assistance_requests 
         WHERE resident_id = ? 
         ORDER BY created_at DESC";
